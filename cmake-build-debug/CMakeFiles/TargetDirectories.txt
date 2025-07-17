@@ -1,0 +1,3 @@
+C:/study/OOP/cursova/cursova/cmake-build-debug/CMakeFiles/cursova.dir
+C:/study/OOP/cursova/cursova/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/study/OOP/cursova/cursova/cmake-build-debug/CMakeFiles/rebuild_cache.dir
