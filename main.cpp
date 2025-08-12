@@ -1,6 +1,306 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+using namespace std;
 
+// ===== Interface =====
+class ISerializable {
+public:
+    virtual void loadFromString(const string &data) = 0;
+    virtual string toString() const = 0;
+    virtual ~ISerializable() {}
+};
+
+// ===== Abstract class =====
+class Entity : public ISerializable {
+protected:
+    int id;
+public:
+    virtual void display() const = 0;
+    virtual ~Entity() {}
+};
+
+// ===== Team class =====
+class Team : public Entity {
+private:
+    string name, city;
+    int gamesPlayed, wins, losses, draws, playersCount;
+public:
+    Team() : gamesPlayed(0), wins(0), losses(0), draws(0), playersCount(0) {}
+    Team(string n, string c, int g, int w, int l, int d, int p)
+        : name(n), city(c), gamesPlayed(g), wins(w), losses(l), draws(d), playersCount(p) {}
+
+    void display() const override {
+        cout << name << " (" << city << ") | Games: " << gamesPlayed
+             << " | Wins: " << wins << " | Losses: " << losses
+             << " | Draws: " << draws << " | Players: " << playersCount << endl;
+    }
+
+    void loadFromString(const string &data) override {
+        stringstream ss(data);
+        getline(ss, name, ',');
+        getline(ss, city, ',');
+        ss >> gamesPlayed; ss.ignore();
+        ss >> wins; ss.ignore();
+        ss >> losses; ss.ignore();
+        ss >> draws; ss.ignore();
+        ss >> playersCount;
+    }
+
+    string toString() const override {
+        stringstream ss;
+        ss << name << "," << city << "," << gamesPlayed << ","
+           << wins << "," << losses << "," << draws << "," << playersCount;
+        return ss.str();
+    }
+
+    int getWins() const { return wins; }
+    int getPlayersCount() const { return playersCount; }
+    string getName() const { return name; }
+};
+
+// ===== User class =====
+class User : public ISerializable {
+private:
+    string username, password;
+    bool isAdmin;
+public:
+    User() : isAdmin(false) {}
+    User(string u, string p, bool a) : username(u), password(p), isAdmin(a) {}
+
+    void loadFromString(const string &data) override {
+        size_t pos = data.find(':');
+        username = data.substr(0, pos);
+        password = data.substr(pos + 1);
+        isAdmin = (username == "admin");
+    }
+
+    string toString() const override {
+        return username + ":" + password;
+    }
+
+    bool checkPassword(const string &u, const string &p) const {
+        return username == u && password == p;
+    }
+
+    bool admin() const { return isAdmin; }
+    string getUsername() const { return username; }
+};
+
+// ===== Database Manager =====
+class DatabaseManager {
+private:
+    vector<Team> teams;
+    vector<User> users;
+public:
+    void loadUsers() {
+        ifstream file("users.txt");
+        if (!file) throw runtime_error("Failed to open users.txt");
+        string line;
+        while (getline(file, line)) {
+            User u;
+            u.loadFromString(line);
+            users.push_back(u);
+        }
+    }
+
+    void loadTeams() {
+        ifstream file("teams.csv");
+        if (!file) throw runtime_error("Failed to open teams.csv");
+        string line;
+        while (getline(file, line)) {
+            Team t;
+            t.loadFromString(line);
+            teams.push_back(t);
+        }
+    }
+
+    void saveTeams() {
+        ofstream file("teams.csv", ios::out | ios::trunc);
+        for (auto &t : teams) {
+            file << t.toString() << "\n";
+        }
+    }
+
+    void saveUsers() {
+        ofstream file("users.txt");
+        for (auto &u : users) {
+            file << u.toString() << "\n";
+        }
+    }
+
+    bool login(string u, string p, bool &adminFlag) {
+        for (auto &usr : users) {
+            if (usr.checkPassword(u, p)) {
+                adminFlag = usr.admin();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void viewTeams() {
+        for (auto &t : teams) t.display();
+    }
+
+    void addTeam() {
+        string name, city;
+        int g, w, l, d, p;
+        cout << "Enter name: "; cin.ignore(); getline(cin, name);
+        cout << "Enter city: "; getline(cin, city);
+        cout << "Games played: "; cin >> g;
+        cout << "Wins: "; cin >> w;
+        cout << "Losses: "; cin >> l;
+        cout << "Draws: "; cin >> d;
+        cout << "Players count: "; cin >> p;
+        teams.push_back(Team(name, city, g, w, l, d, p));
+        cout << "Team added!\n";
+    }
+
+    void deleteTeam() {
+        string name;
+        cout << "Enter team name to delete: ";
+        cin.ignore();
+        getline(cin, name);
+        for (auto it = teams.begin(); it != teams.end(); ++it) {
+            if (it->getName() == name) {
+                teams.erase(it);
+                cout << "Team deleted!\n";
+                return;
+            }
+        }
+        cout << "Team not found.\n";
+    }
+
+    void searchTeam() {
+        string name;
+        cout << "Enter team name to search: ";
+        cin.ignore();
+        getline(cin, name);
+        for (auto &t : teams) {
+            if (t.getName() == name) {
+                t.display();
+                return;
+            }
+        }
+        cout << "Team not found.\n";
+    }
+
+    void countTeamsWithLessThan10Players() {
+        int count = 0;
+        for (auto &t : teams) {
+            if (t.getPlayersCount() < 10) count++;
+        }
+        cout << "Number of teams with less than 10 players: " << count << endl;
+    }
+
+    void findTeamWithMostWins() {
+        if (teams.empty()) return;
+        Team best = teams[0];
+        for (auto &t : teams) {
+            if (t.getWins() > best.getWins()) best = t;
+        }
+        cout << "Team with the most wins:\n";
+        best.display();
+    }
+
+    void viewUsers() {
+        for (auto &u : users) {
+            cout << u.getUsername() << (u.admin() ? " (Admin)" : " (User)") << endl;
+        }
+    }
+
+    void addUser() {
+        string u, p;
+        cout << "Enter username: "; cin >> u;
+        cout << "Enter password: "; cin >> p;
+        users.push_back(User(u, p, false));
+        cout << "User added!\n";
+    }
+
+    void deleteUser() {
+        string u;
+        cout << "Enter username to delete: "; cin >> u;
+        if (u == "admin") {
+            cout << "You cannot delete the admin.\n";
+            return;
+        }
+        for (auto it = users.begin(); it != users.end(); ++it) {
+            if (it->getUsername() == u) {
+                users.erase(it);
+                cout << "User deleted!\n";
+                return;
+            }
+        }
+        cout << "User not found.\n";
+    }
+};
+
+// ===== Main =====
 int main() {
-  
+    DatabaseManager db;
+    try {
+        db.loadUsers();
+        db.loadTeams();
+    } catch (const exception &e) {
+        cerr << e.what() << endl;
+        return 1;
+    }
+
+    string login, pass;
+    bool isAdmin = false;
+
+    cout << "Login: ";
+    cin >> login;
+    cout << "Password: ";
+    cin >> pass;
+
+    if (!db.login(login, pass, isAdmin)) {
+        cout << "Invalid login or password!\n";
+        return 0;
+    }
+
+    cout << "Welcome, " << login << "! You are " << (isAdmin ? "Administrator" : "User") << ".\n";
+
+    int choice;
+    if (isAdmin) {
+        do {
+            cout << "\n--- Admin Menu ---\n";
+            cout << "1. View teams\n2. Add team\n3. Delete team\n4. Search team\n";
+            cout << "5. Count teams with <10 players\n6. Find team with most wins\n";
+            cout << "7. View users\n8. Add user\n9. Delete user\n0. Exit\nChoice: ";
+            cin >> choice;
+            switch (choice) {
+                case 1: db.viewTeams(); break;
+                case 2: db.addTeam(); break;
+                case 3: db.deleteTeam(); break;
+                case 4: db.searchTeam(); break;
+                case 5: db.countTeamsWithLessThan10Players(); break;
+                case 6: db.findTeamWithMostWins(); break;
+                case 7: db.viewUsers(); break;
+                case 8: db.addUser(); break;
+                case 9: db.deleteUser(); break;
+                case 0: db.saveTeams(); db.saveUsers(); cout << "Data saved. Exiting...\n"; break;
+                default: cout << "Invalid choice.\n";
+            }
+        } while (choice != 0);
+    } else {
+        do {
+            cout << "\n--- User Menu ---\n";
+            cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n0. Exit\nChoice: ";
+            cin >> choice;
+            switch (choice) {
+                case 1: db.viewTeams(); break;
+                case 2: db.searchTeam(); break;
+                case 3: db.countTeamsWithLessThan10Players(); break;
+                case 4: db.findTeamWithMostWins(); break;
+                case 0: db.saveTeams(); cout << "Data saved. Exiting...\n"; break;
+                default: cout << "Invalid choice.\n";
+            }
+        } while (choice != 0);
+    }
+
     return 0;
 }
