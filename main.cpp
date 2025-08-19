@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 class ISerializable {
@@ -48,14 +49,18 @@ public:
 
     string toString() const override {
         stringstream ss;
-        ss << name << "," << city << "," << gamesPlayed << ","
-           << wins << "," << losses << "," << draws << "," << playersCount;
+        ss << name << "," << city << "," << gamesPlayed << "," << wins
+           << "," << losses << "," << draws << "," << playersCount;
         return ss.str();
     }
 
     int getWins() const { return wins; }
     int getPlayersCount() const { return playersCount; }
+    int getGamesPlayed() const { return gamesPlayed; }
+    int getLosses() const { return losses; }
+    int getDraws() const { return draws; }
     string getName() const { return name; }
+    string getCity() const { return city; }
 
     void setName(const string &n) { name = n; }
     void setCity(const string &c) { city = c; }
@@ -166,8 +171,7 @@ public:
     void deleteTeam() {
         string name;
         cout << "Enter team name to delete: ";
-        cin.ignore();
-        getline(cin, name);
+        cin.ignore(); getline(cin, name);
         for (auto it = teams.begin(); it != teams.end(); ++it) {
             if (it->getName() == name) {
                 teams.erase(it);
@@ -182,8 +186,7 @@ public:
     void searchTeam() {
         string name;
         cout << "Enter team name to search: ";
-        cin.ignore();
-        getline(cin, name);
+        cin.ignore(); getline(cin, name);
         for (auto &t : teams) {
             if (t.getName() == name) {
                 t.display();
@@ -196,8 +199,7 @@ public:
     void editTeam() {
         string name;
         cout << "Enter team name to edit: ";
-        cin.ignore();
-        getline(cin, name);
+        cin.ignore(); getline(cin, name);
 
         for (auto &t : teams) {
             if (t.getName() == name) {
@@ -210,16 +212,11 @@ public:
                 cout << "Enter new city (leave empty to keep current): ";
                 getline(cin, newCity);
 
-                cout << "Games played (-1 to keep current): ";
-                cin >> g;
-                cout << "Wins (-1 to keep current): ";
-                cin >> w;
-                cout << "Losses (-1 to keep current): ";
-                cin >> l;
-                cout << "Draws (-1 to keep current): ";
-                cin >> d;
-                cout << "Players count (-1 to keep current): ";
-                cin >> p;
+                cout << "Games played (-1 to keep current): "; cin >> g;
+                cout << "Wins (-1 to keep current): "; cin >> w;
+                cout << "Losses (-1 to keep current): "; cin >> l;
+                cout << "Draws (-1 to keep current): "; cin >> d;
+                cout << "Players count (-1 to keep current): "; cin >> p;
 
                 if (!newName.empty()) t.setName(newName);
                 if (!newCity.empty()) t.setCity(newCity);
@@ -239,26 +236,20 @@ public:
 
     void countTeamsWithLessThan10Players() {
         int count = 0;
-        for (auto &t : teams) {
-            if (t.getPlayersCount() < 10) count++;
-        }
+        for (auto &t : teams) if (t.getPlayersCount() < 10) count++;
         cout << "Number of teams with less than 10 players: " << count << endl;
     }
 
     void findTeamWithMostWins() {
         if (teams.empty()) return;
         Team best = teams[0];
-        for (auto &t : teams) {
-            if (t.getWins() > best.getWins()) best = t;
-        }
+        for (auto &t : teams) if (t.getWins() > best.getWins()) best = t;
         cout << "Team with the most wins:\n";
         best.display();
     }
 
     void viewUsers() {
-        for (auto &u : users) {
-            cout << u.getUsername() << (u.admin() ? " (Admin)" : " (User)") << endl;
-        }
+        for (auto &u : users) cout << u.getUsername() << (u.admin() ? " (Admin)" : " (User)") << endl;
     }
 
     void addUser() {
@@ -273,10 +264,7 @@ public:
     void deleteUser() {
         string u;
         cout << "Enter username to delete: "; cin >> u;
-        if (u == "admin") {
-            cout << "You cannot delete the admin.\n";
-            return;
-        }
+        if (u == "admin") { cout << "You cannot delete the admin.\n"; return; }
         for (auto it = users.begin(); it != users.end(); ++it) {
             if (it->getUsername() == u) {
                 users.erase(it);
@@ -286,6 +274,25 @@ public:
             }
         }
         cout << "User not found.\n";
+    }
+
+    void sortTeams() {
+        int choice;
+        cout << "Sort teams by:\n1. Name\n2. City\n3. Games played\n4. Wins\n5. Losses\n6. Draws\n7. Players count\nChoice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getName() < b.getName(); }); break;
+            case 2: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getCity() < b.getCity(); }); break;
+            case 3: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getGamesPlayed() > b.getGamesPlayed(); }); break;
+            case 4: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getWins() > b.getWins(); }); break;
+            case 5: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getLosses() > b.getLosses(); }); break;
+            case 6: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getDraws() > b.getDraws(); }); break;
+            case 7: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getPlayersCount() > b.getPlayersCount(); }); break;
+            default: cout << "Invalid choice.\n"; return;
+        }
+        cout << "Teams sorted:\n";
+        viewTeams();
     }
 };
 
@@ -301,11 +308,8 @@ int main() {
 
     string login, pass;
     bool isAdmin = false;
-
-    cout << "Login: ";
-    cin >> login;
-    cout << "Password: ";
-    cin >> pass;
+    cout << "Login: "; cin >> login;
+    cout << "Password: "; cin >> pass;
 
     if (!db.login(login, pass, isAdmin)) {
         cout << "Invalid login or password!\n";
@@ -320,7 +324,7 @@ int main() {
             cout << "\n--- Admin Menu ---\n";
             cout << "1. View teams\n2. Add team\n3. Delete team\n4. Search team\n5. Edit team\n";
             cout << "6. Count teams with <10 players\n7. Find team with most wins\n";
-            cout << "8. View users\n9. Add user\n10. Delete user\n0. Exit\nChoice: ";
+            cout << "8. View users\n9. Add user\n10. Delete user\n11. Sort teams\n0. Exit\nChoice: ";
             cin >> choice;
             switch (choice) {
                 case 1: db.viewTeams(); break;
@@ -333,6 +337,7 @@ int main() {
                 case 8: db.viewUsers(); break;
                 case 9: db.addUser(); break;
                 case 10: db.deleteUser(); break;
+                case 11: db.sortTeams(); break;
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
@@ -340,18 +345,20 @@ int main() {
     } else {
         do {
             cout << "\n--- User Menu ---\n";
-            cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n0. Exit\nChoice: ";
+            cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n5. Sort teams\n0. Exit\nChoice: ";
             cin >> choice;
             switch (choice) {
                 case 1: db.viewTeams(); break;
                 case 2: db.searchTeam(); break;
                 case 3: db.countTeamsWithLessThan10Players(); break;
                 case 4: db.findTeamWithMostWins(); break;
+                case 5: db.sortTeams(); break;  
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
         } while (choice != 0);
     }
+
 
     return 0;
 }
