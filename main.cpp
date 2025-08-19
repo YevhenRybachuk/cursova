@@ -59,6 +59,15 @@ public:
     int getWins() const { return wins; }
     int getPlayersCount() const { return playersCount; }
     string getName() const { return name; }
+
+    // === Сеттери для редагування ===
+    void setName(const string &n) { name = n; }
+    void setCity(const string &c) { city = c; }
+    void setGames(int g) { gamesPlayed = g; }
+    void setWins(int w) { wins = w; }
+    void setLosses(int l) { losses = l; }
+    void setDraws(int d) { draws = d; }
+    void setPlayers(int p) { playersCount = p; }
 };
 
 // ===== User class =====
@@ -156,7 +165,8 @@ public:
         cout << "Draws: "; cin >> d;
         cout << "Players count: "; cin >> p;
         teams.push_back(Team(name, city, g, w, l, d, p));
-        cout << "Team added!\n";
+        saveTeams();
+        cout << "Team added and saved!\n";
     }
 
     void deleteTeam() {
@@ -167,7 +177,8 @@ public:
         for (auto it = teams.begin(); it != teams.end(); ++it) {
             if (it->getName() == name) {
                 teams.erase(it);
-                cout << "Team deleted!\n";
+                saveTeams();
+                cout << "Team deleted and saved!\n";
                 return;
             }
         }
@@ -182,6 +193,50 @@ public:
         for (auto &t : teams) {
             if (t.getName() == name) {
                 t.display();
+                return;
+            }
+        }
+        cout << "Team not found.\n";
+    }
+
+    void editTeam() {
+        string name;
+        cout << "Enter team name to edit: ";
+        cin.ignore();
+        getline(cin, name);
+
+        for (auto &t : teams) {
+            if (t.getName() == name) {
+                string newName, newCity;
+                int g, w, l, d, p;
+
+                cout << "Editing team: " << name << endl;
+                cout << "Enter new name (leave empty to keep current): ";
+                getline(cin, newName);
+                cout << "Enter new city (leave empty to keep current): ";
+                getline(cin, newCity);
+
+                cout << "Games played (-1 to keep current): ";
+                cin >> g;
+                cout << "Wins (-1 to keep current): ";
+                cin >> w;
+                cout << "Losses (-1 to keep current): ";
+                cin >> l;
+                cout << "Draws (-1 to keep current): ";
+                cin >> d;
+                cout << "Players count (-1 to keep current): ";
+                cin >> p;
+
+                if (!newName.empty()) t.setName(newName);
+                if (!newCity.empty()) t.setCity(newCity);
+                if (g >= 0) t.setGames(g);
+                if (w >= 0) t.setWins(w);
+                if (l >= 0) t.setLosses(l);
+                if (d >= 0) t.setDraws(d);
+                if (p >= 0) t.setPlayers(p);
+
+                saveTeams();
+                cout << "Team updated and saved!\n";
                 return;
             }
         }
@@ -217,7 +272,8 @@ public:
         cout << "Enter username: "; cin >> u;
         cout << "Enter password: "; cin >> p;
         users.push_back(User(u, p, false));
-        cout << "User added!\n";
+        saveUsers();
+        cout << "User added and saved!\n";
     }
 
     void deleteUser() {
@@ -230,7 +286,8 @@ public:
         for (auto it = users.begin(); it != users.end(); ++it) {
             if (it->getUsername() == u) {
                 users.erase(it);
-                cout << "User deleted!\n";
+                saveUsers();
+                cout << "User deleted and saved!\n";
                 return;
             }
         }
@@ -268,21 +325,22 @@ int main() {
     if (isAdmin) {
         do {
             cout << "\n--- Admin Menu ---\n";
-            cout << "1. View teams\n2. Add team\n3. Delete team\n4. Search team\n";
-            cout << "5. Count teams with <10 players\n6. Find team with most wins\n";
-            cout << "7. View users\n8. Add user\n9. Delete user\n0. Exit\nChoice: ";
+            cout << "1. View teams\n2. Add team\n3. Delete team\n4. Search team\n5. Edit team\n";
+            cout << "6. Count teams with <10 players\n7. Find team with most wins\n";
+            cout << "8. View users\n9. Add user\n10. Delete user\n0. Exit\nChoice: ";
             cin >> choice;
             switch (choice) {
                 case 1: db.viewTeams(); break;
                 case 2: db.addTeam(); break;
                 case 3: db.deleteTeam(); break;
                 case 4: db.searchTeam(); break;
-                case 5: db.countTeamsWithLessThan10Players(); break;
-                case 6: db.findTeamWithMostWins(); break;
-                case 7: db.viewUsers(); break;
-                case 8: db.addUser(); break;
-                case 9: db.deleteUser(); break;
-                case 0: db.saveTeams(); db.saveUsers(); cout << "Data saved. Exiting...\n"; break;
+                case 5: db.editTeam(); break;
+                case 6: db.countTeamsWithLessThan10Players(); break;
+                case 7: db.findTeamWithMostWins(); break;
+                case 8: db.viewUsers(); break;
+                case 9: db.addUser(); break;
+                case 10: db.deleteUser(); break;
+                case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
         } while (choice != 0);
@@ -296,7 +354,7 @@ int main() {
                 case 2: db.searchTeam(); break;
                 case 3: db.countTeamsWithLessThan10Players(); break;
                 case 4: db.findTeamWithMostWins(); break;
-                case 0: db.saveTeams(); cout << "Data saved. Exiting...\n"; break;
+                case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
         } while (choice != 0);
