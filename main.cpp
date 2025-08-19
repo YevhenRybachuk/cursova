@@ -5,7 +5,6 @@
 #include <sstream>
 using namespace std;
 
-// ===== Interface =====
 class ISerializable {
 public:
     virtual void loadFromString(const string &data) = 0;
@@ -13,7 +12,6 @@ public:
     virtual ~ISerializable() {}
 };
 
-// ===== Abstract class =====
 class Entity : public ISerializable {
 protected:
     int id;
@@ -22,7 +20,6 @@ public:
     virtual ~Entity() {}
 };
 
-// ===== Team class =====
 class Team : public Entity {
 private:
     string name, city;
@@ -60,7 +57,6 @@ public:
     int getPlayersCount() const { return playersCount; }
     string getName() const { return name; }
 
-    // === Сеттери для редагування ===
     void setName(const string &n) { name = n; }
     void setCity(const string &c) { city = c; }
     void setGames(int g) { gamesPlayed = g; }
@@ -70,7 +66,6 @@ public:
     void setPlayers(int p) { playersCount = p; }
 };
 
-// ===== User class =====
 class User : public ISerializable {
 private:
     string username, password;
@@ -98,7 +93,6 @@ public:
     string getUsername() const { return username; }
 };
 
-// ===== Database Manager =====
 class DatabaseManager {
 private:
     vector<Team> teams;
@@ -295,7 +289,6 @@ public:
     }
 };
 
-// ===== Main =====
 int main() {
     DatabaseManager db;
     try {
