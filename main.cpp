@@ -294,6 +294,36 @@ public:
         cout << "Teams sorted:\n";
         viewTeams();
     }
+
+    void showHelp() {
+        cout << "\n=== Help ===\n";
+        cout << "This program allows you to work with football teams.\n";
+        cout << "You can look at teams, search for a team, and see statistics.\n";
+        cout << "Some actions are available only to special users with more rights.\n\n";
+
+        cout << "How to enter information:\n";
+        cout << "- Team name and city: write them as normal words (for example: Tigers, London).\n";
+        cout << "- Numbers like games played, wins, losses, draws and players must be written as whole numbers (for example: 12).\n";
+        cout << "- When changing a team, if you do not want to change some value, just type -1 or press Enter to leave it the same.\n\n";
+
+        cout << "What each menu item means:\n";
+        cout << " 1. View teams – show the list of all teams.\n";
+        cout << " 2. Add team – create a new team (only for special users).\n";
+        cout << " 3. Delete team – remove a team (only for special users).\n";
+        cout << " 4. Search team – find a team by its name.\n";
+        cout << " 5. Edit team – change team information (only for special users).\n";
+        cout << " 6. Count teams with less than 10 players – see how many small teams exist.\n";
+        cout << " 7. Find team with the most wins – see which team is the best.\n";
+        cout << " 8. View users – show the list of people who can use the program (only for special users).\n";
+        cout << " 9. Add user – allow a new person to use the program (only for special users).\n";
+        cout << "10. Delete user – remove a person from the program (only for special users).\n";
+        cout << "11. Sort teams – arrange teams by name, city, or results.\n";
+        cout << "12. Help – show these instructions.\n";
+        cout << " 0. Exit – close the program.\n";
+        cout << "=====================================\n\n";
+    }
+
+
 };
 
 int main() {
@@ -324,7 +354,7 @@ int main() {
             cout << "\n--- Admin Menu ---\n";
             cout << "1. View teams\n2. Add team\n3. Delete team\n4. Search team\n5. Edit team\n";
             cout << "6. Count teams with <10 players\n7. Find team with most wins\n";
-            cout << "8. View users\n9. Add user\n10. Delete user\n11. Sort teams\n0. Exit\nChoice: ";
+            cout << "8. View users\n9. Add user\n10. Delete user\n11. Sort teams\n12. Help\n0. Exit\nChoice: ";
             cin >> choice;
             switch (choice) {
                 case 1: db.viewTeams(); break;
@@ -338,6 +368,7 @@ int main() {
                 case 9: db.addUser(); break;
                 case 10: db.deleteUser(); break;
                 case 11: db.sortTeams(); break;
+                case 12: db.showHelp(); break; // NEW
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
@@ -345,20 +376,20 @@ int main() {
     } else {
         do {
             cout << "\n--- User Menu ---\n";
-            cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n5. Sort teams\n0. Exit\nChoice: ";
+            cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n5. Sort teams\n6. Help\n0. Exit\nChoice: ";
             cin >> choice;
             switch (choice) {
                 case 1: db.viewTeams(); break;
                 case 2: db.searchTeam(); break;
                 case 3: db.countTeamsWithLessThan10Players(); break;
                 case 4: db.findTeamWithMostWins(); break;
-                case 5: db.sortTeams(); break;  
+                case 5: db.sortTeams(); break;
+                case 6: db.showHelp(); break; // NEW
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
         } while (choice != 0);
     }
-
 
     return 0;
 }
