@@ -119,6 +119,21 @@ public:
         }
     }
 
+    int safeInputWithKeep(const string &prompt) {
+        string input;
+        int value;
+        while (true) {
+            cout << prompt;
+            getline(cin, input);
+            stringstream ss(input);
+            if (ss >> value && ss.eof()) {
+                if (value >= -1) return value;
+            }
+            cout << "Invalid input! Please enter a whole number (>=0 or -1 to keep current).\n";
+        }
+    }
+
+
     bool isValidName(const string &str) {
         if (str.empty()) return false;
 
@@ -245,7 +260,7 @@ public:
         cout << "Team not found.\n";
     }
 
-    void editTeam() {
+   void editTeam() {
     string name;
     cout << "Enter team name to edit: ";
     cin.ignore();
@@ -254,7 +269,6 @@ public:
     for (auto &t : teams) {
         if (t.getName() == name) {
             string newName, newCity;
-            int g, w, l, d, p;
 
             cout << "Editing team: " << name << endl;
 
@@ -274,11 +288,11 @@ public:
                 }
             } while (!newCity.empty() && !isValidName(newCity));
 
-            cout << "Games played (-1 to keep current): "; cin >> g;
-            cout << "Wins (-1 to keep current): "; cin >> w;
-            cout << "Losses (-1 to keep current): "; cin >> l;
-            cout << "Draws (-1 to keep current): "; cin >> d;
-            cout << "Players count (-1 to keep current): "; cin >> p;
+            int g = safeInputWithKeep("Games played (-1 to keep current): ");
+            int w = safeInputWithKeep("Wins (-1 to keep current): ");
+            int l = safeInputWithKeep("Losses (-1 to keep current): ");
+            int d = safeInputWithKeep("Draws (-1 to keep current): ");
+            int p = safeInputWithKeep("Players count (-1 to keep current): ");
 
             if (g < 0) g = t.getGamesPlayed();
             if (w < 0) w = t.getWins();
@@ -306,7 +320,6 @@ public:
     }
     cout << "Team not found.\n";
 }
-
 
 
     void countTeamsWithLessThan10Players() {
