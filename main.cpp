@@ -103,6 +103,22 @@ private:
     vector<Team> teams;
     vector<User> users;
 public:
+
+    bool isValidName(const string &str) {
+        if (str.empty()) return false;
+
+        bool hasLetter = false;
+        for (char c : str) {
+            if (isalpha(static_cast<unsigned char>(c))) {
+                hasLetter = true;
+            } else if (!(c == ' ' || c == '-')) {
+                return false; 
+            }
+        }
+        return hasLetter;
+    }
+
+
     void loadUsers() {
         ifstream file("users.txt");
         if (!file) throw runtime_error("Failed to open users.txt");
@@ -156,8 +172,21 @@ public:
     void addTeam() {
         string name, city;
         int g, w, l, d, p;
-        cout << "Enter name: "; cin.ignore(); getline(cin, name);
-        cout << "Enter city: "; getline(cin, city);
+
+        cin.ignore();
+
+        do {
+            cout << "Enter team name (letters, spaces, hyphens only): ";
+            getline(cin, name);
+            if (!isValidName(name)) cout << "Invalid name! Try again.\n";
+        } while (!isValidName(name));
+
+        do {
+            cout << "Enter city (letters, spaces, hyphens only): ";
+            getline(cin, city);
+            if (!isValidName(city)) cout << "Invalid city name! Try again.\n";
+        } while (!isValidName(city));
+
         cout << "Games played: "; cin >> g;
         cout << "Wins: "; cin >> w;
         cout << "Losses: "; cin >> l;
@@ -173,8 +202,6 @@ public:
         saveTeams();
         cout << "Team added and saved!\n";
     }
-
-
 
     void deleteTeam() {
         string name;
@@ -205,53 +232,67 @@ public:
     }
 
     void editTeam() {
-        string name;
-        cout << "Enter team name to edit: ";
-        cin.ignore(); getline(cin, name);
+    string name;
+    cout << "Enter team name to edit: ";
+    cin.ignore();
+    getline(cin, name);
 
-        for (auto &t : teams) {
-            if (t.getName() == name) {
-                string newName, newCity;
-                int g, w, l, d, p;
+    for (auto &t : teams) {
+        if (t.getName() == name) {
+            string newName, newCity;
+            int g, w, l, d, p;
 
-                cout << "Editing team: " << name << endl;
+            cout << "Editing team: " << name << endl;
+
+            do {
                 cout << "Enter new name (leave empty to keep current): ";
                 getline(cin, newName);
+                if (!newName.empty() && !isValidName(newName)) {
+                    cout << "Invalid name! Try again.\n";
+                }
+            } while (!newName.empty() && !isValidName(newName));
+
+            do {
                 cout << "Enter new city (leave empty to keep current): ";
                 getline(cin, newCity);
-
-                cout << "Games played (-1 to keep current): "; cin >> g;
-                cout << "Wins (-1 to keep current): "; cin >> w;
-                cout << "Losses (-1 to keep current): "; cin >> l;
-                cout << "Draws (-1 to keep current): "; cin >> d;
-                cout << "Players count (-1 to keep current): "; cin >> p;
-
-                if (g < 0) g = t.getGamesPlayed();
-                if (w < 0) w = t.getWins();
-                if (l < 0) l = t.getLosses();
-                if (d < 0) d = t.getDraws();
-                if (p < 0) p = t.getPlayersCount();
-
-                if (w + l + d != g) {
-                    cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
-                    return;
+                if (!newCity.empty() && !isValidName(newCity)) {
+                    cout << "Invalid city name! Try again.\n";
                 }
+            } while (!newCity.empty() && !isValidName(newCity));
 
-                if (!newName.empty()) t.setName(newName);
-                if (!newCity.empty()) t.setCity(newCity);
-                t.setGames(g);
-                t.setWins(w);
-                t.setLosses(l);
-                t.setDraws(d);
-                t.setPlayers(p);
+            cout << "Games played (-1 to keep current): "; cin >> g;
+            cout << "Wins (-1 to keep current): "; cin >> w;
+            cout << "Losses (-1 to keep current): "; cin >> l;
+            cout << "Draws (-1 to keep current): "; cin >> d;
+            cout << "Players count (-1 to keep current): "; cin >> p;
 
-                saveTeams();
-                cout << "Team updated and saved!\n";
+            if (g < 0) g = t.getGamesPlayed();
+            if (w < 0) w = t.getWins();
+            if (l < 0) l = t.getLosses();
+            if (d < 0) d = t.getDraws();
+            if (p < 0) p = t.getPlayersCount();
+
+            if (w + l + d != g) {
+                cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
                 return;
             }
+
+            if (!newName.empty()) t.setName(newName);
+            if (!newCity.empty()) t.setCity(newCity);
+            t.setGames(g);
+            t.setWins(w);
+            t.setLosses(l);
+            t.setDraws(d);
+            t.setPlayers(p);
+
+            saveTeams();
+            cout << "Team updated and saved!\n";
+            return;
         }
-        cout << "Team not found.\n";
     }
+    cout << "Team not found.\n";
+}
+
 
 
     void countTeamsWithLessThan10Players() {
