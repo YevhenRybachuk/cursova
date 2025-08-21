@@ -163,10 +163,18 @@ public:
         cout << "Losses: "; cin >> l;
         cout << "Draws: "; cin >> d;
         cout << "Players count: "; cin >> p;
+
+        if (w + l + d != g) {
+            cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
+            return;
+        }
+
         teams.push_back(Team(name, city, g, w, l, d, p));
         saveTeams();
         cout << "Team added and saved!\n";
     }
+
+
 
     void deleteTeam() {
         string name;
@@ -218,13 +226,24 @@ public:
                 cout << "Draws (-1 to keep current): "; cin >> d;
                 cout << "Players count (-1 to keep current): "; cin >> p;
 
+                if (g < 0) g = t.getGamesPlayed();
+                if (w < 0) w = t.getWins();
+                if (l < 0) l = t.getLosses();
+                if (d < 0) d = t.getDraws();
+                if (p < 0) p = t.getPlayersCount();
+
+                if (w + l + d != g) {
+                    cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
+                    return;
+                }
+
                 if (!newName.empty()) t.setName(newName);
                 if (!newCity.empty()) t.setCity(newCity);
-                if (g >= 0) t.setGames(g);
-                if (w >= 0) t.setWins(w);
-                if (l >= 0) t.setLosses(l);
-                if (d >= 0) t.setDraws(d);
-                if (p >= 0) t.setPlayers(p);
+                t.setGames(g);
+                t.setWins(w);
+                t.setLosses(l);
+                t.setDraws(d);
+                t.setPlayers(p);
 
                 saveTeams();
                 cout << "Team updated and saved!\n";
@@ -233,6 +252,7 @@ public:
         }
         cout << "Team not found.\n";
     }
+
 
     void countTeamsWithLessThan10Players() {
         int count = 0;
@@ -368,7 +388,7 @@ int main() {
                 case 9: db.addUser(); break;
                 case 10: db.deleteUser(); break;
                 case 11: db.sortTeams(); break;
-                case 12: db.showHelp(); break; // NEW
+                case 12: db.showHelp(); break;
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
@@ -384,7 +404,7 @@ int main() {
                 case 3: db.countTeamsWithLessThan10Players(); break;
                 case 4: db.findTeamWithMostWins(); break;
                 case 5: db.sortTeams(); break;
-                case 6: db.showHelp(); break; // NEW
+                case 6: db.showHelp(); break;
                 case 0: cout << "Exiting...\n"; break;
                 default: cout << "Invalid choice.\n";
             }
