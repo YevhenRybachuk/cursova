@@ -104,6 +104,21 @@ private:
     vector<User> users;
 public:
 
+    int safeInput(const string &prompt) {
+        string input;
+        int value;
+        while (true) {
+            cout << prompt;
+            getline(cin, input);
+            stringstream ss(input);
+            if (ss >> value && ss.eof() && value >= 0) {
+                return value;
+            } else {
+                cout << "Invalid input! Please enter a non-negative whole number.\n";
+            }
+        }
+    }
+
     bool isValidName(const string &str) {
         if (str.empty()) return false;
 
@@ -112,7 +127,7 @@ public:
             if (isalpha(static_cast<unsigned char>(c))) {
                 hasLetter = true;
             } else if (!(c == ' ' || c == '-')) {
-                return false; 
+                return false;
             }
         }
         return hasLetter;
@@ -171,7 +186,6 @@ public:
 
     void addTeam() {
         string name, city;
-        int g, w, l, d, p;
 
         cin.ignore();
 
@@ -187,11 +201,11 @@ public:
             if (!isValidName(city)) cout << "Invalid city name! Try again.\n";
         } while (!isValidName(city));
 
-        cout << "Games played: "; cin >> g;
-        cout << "Wins: "; cin >> w;
-        cout << "Losses: "; cin >> l;
-        cout << "Draws: "; cin >> d;
-        cout << "Players count: "; cin >> p;
+        int g = safeInput("Games played: ");
+        int w = safeInput("Wins: ");
+        int l = safeInput("Losses: ");
+        int d = safeInput("Draws: ");
+        int p = safeInput("Players count: ");
 
         if (w + l + d != g) {
             cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
