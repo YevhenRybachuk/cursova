@@ -1,0 +1,348 @@
+#include "DatabaseManager.h"
+#include <iostream>
+#include <limits>
+
+using namespace std;
+
+// =========================
+// Validation
+// =========================
+bool DatabaseManager::isValidName(const string &str) {
+    if (str.empty()) return false;
+
+    bool hasLetter = false;
+    for (char c : str) {
+        if (isalpha(static_cast<unsigned char>(c))) {
+            hasLetter = true;
+        } else if (!(c == ' ' || c == '-')) {
+            return false;
+        }
+    }
+    return hasLetter;
+}
+
+// =========================
+// Loading / Saving
+// =========================
+void DatabaseManager::loadUsers() {
+    ifstream file("users.txt");
+    if (!file) throw runtime_error("Failed to open users.txt");
+
+    string line;
+    while (getline(file, line)) {
+        User u;
+        u.loadFromString(line);
+        users.push_back(u);
+    }
+}
+
+void DatabaseManager::loadTeams() {
+    ifstream file("teams.csv");
+    if (!file) throw runtime_error("Failed to open teams.csv");
+
+    string line;
+    while (getline(file, line)) {
+        Team t;
+        t.loadFromString(line);
+        teams.push_back(t);
+    }
+}
+
+void DatabaseManager::saveTeams() {
+    ofstream file("teams.csv", ios::trunc);
+    for (auto &t : teams) {
+        file << t.toString() << "\n";
+    }
+}
+
+void DatabaseManager::saveUsers() {
+    ofstream file("users.txt");
+    for (auto &u : users) {
+        file << u.toString() << "\n";
+    }
+}
+
+// =========================
+// Login
+// =========================
+bool DatabaseManager::login(string u, string p, bool &adminFlag) {
+    for (auto &usr : users) {
+        if (usr.checkPassword(u, p)) {
+            adminFlag = usr.admin();
+            return true;
+        }
+    }
+    return false;
+}
+
+// =========================
+// Safe Input Helpers
+// =========================
+bool DatabaseManager::safeInputInt(const string& prompt, int& value) {
+    cout << prompt;
+
+    while (true) {
+        if (cin >> value) {
+            if (value >= 0)
+                return true;
+            else
+                cout << "Number must be positive! Try again: ";
+        } else {
+            cout << "Invalid input! Enter a number: ";
+            cin.clear();
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+}
+
+int DatabaseManager::safeChoice() {
+    int x;
+
+    while (true) {
+        if (cin >> x) {
+            if (x >= 0) return x;
+            cout << "Choice must be >= 0: ";
+        } else {
+            cout << "Invalid number: ";
+            cin.clear();
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+}
+
+// =========================
+// Team operations
+// =========================
+void DatabaseManager::viewTeams() {
+    for (auto &t : teams)
+        t.display();
+}
+
+void DatabaseManager::addTeam() {
+    string name, city;
+    int g, w, l, d, p;
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    do {
+        cout << "Enter team name: ";
+        getline(cin, name);
+        if (!isValidName(name)) cout << "Invalid name!\n";
+    } while (!isValidName(name));
+
+    do {
+        cout << "Enter city: ";
+        getline(cin, city);
+        if (!isValidName(city)) cout << "Invalid city!\n";
+    } while (!isValidName(city));
+
+    safeInputInt("Games played: ", g);
+    safeInputInt("Wins: ", w);
+    safeInputInt("Losses: ", l);
+    safeInputInt("Draws: ", d);
+    safeInputInt("Players count: ", p);
+
+    if (w + l + d != g) {
+        cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
+        return;
+    }
+
+    teams.push_back(Team(name, city, g, w, l, d, p));
+    saveTeams();
+    cout << "Team added!\n";
+}
+
+void DatabaseManager::deleteTeam() {
+    string name;
+    cout << "Enter team name to delete: ";
+    cin.ignore();
+    getline(cin, name);
+
+    for (auto it = teams.begin(); it != teams.end(); ++it) {
+        if (it->getName() == name) {
+            teams.erase(it);
+            saveTeams();
+            cout << "Team deleted!\n";
+            return;
+        }
+    }
+    cout << "Team not found.\n";
+}
+
+void DatabaseManager::searchTeam() {
+    string name;
+    cout << "Enter team name: ";
+    cin.ignore();
+    getline(cin, name);
+
+    for (auto &t : teams) {
+        if (t.getName() == name) {
+            t.display();
+            return;
+        }
+    }
+    cout << "Team not found.\n";
+}
+
+void DatabaseManager::editTeam() {
+    string name;
+    cout << "Enter team name to edit: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, name);
+
+    for (auto &t : teams) {
+        if (t.getName() == name) {
+
+            string newName, newCity;
+            int g, w, l, d, p;
+
+            cout << "Editing team: " << name << endl;
+
+            do {
+                cout << "Enter NEW team name: ";
+                getline(cin, newName);
+
+                if (newName.empty()) {
+                    cout << "Cannot be empty!\n";
+                    continue;
+                }
+            } while (!isValidName(newName));
+
+            do {
+                cout << "Enter NEW city: ";
+                getline(cin, newCity);
+
+                if (newCity.empty()) {
+                    cout << "Cannot be empty!\n";
+                    continue;
+                }
+            } while (!isValidName(newCity));
+
+            cout << "Enter NEW games played: "; g = safeChoice();
+            cout << "Enter NEW wins: "; w = safeChoice();
+            cout << "Enter NEW losses: "; l = safeChoice();
+            cout << "Enter NEW draws: "; d = safeChoice();
+            cout << "Enter NEW players count: "; p = safeChoice();
+
+            if (w + l + d != g) {
+                cout << "Error: Wins + Losses + Draws != Games Played!\n";
+                return;
+            }
+
+            t.setName(newName);
+            t.setCity(newCity);
+            t.setGames(g);
+            t.setWins(w);
+            t.setLosses(l);
+            t.setDraws(d);
+            t.setPlayers(p);
+
+            saveTeams();
+            cout << "Team updated!\n";
+            return;
+        }
+    }
+
+    cout << "Team not found.\n";
+}
+
+void DatabaseManager::countTeamsWithLessThan10Players() {
+    int count = 0;
+    for (auto &t : teams)
+        if (t.getPlayersCount() < 10) count++;
+
+    cout << "Teams with <10 players: " << count << endl;
+}
+
+void DatabaseManager::findTeamWithMostWins() {
+    if (teams.empty()) return;
+
+    Team best = teams[0];
+    for (auto &t : teams)
+        if (t.getWins() > best.getWins())
+            best = t;
+
+    cout << "Team with most wins:\n";
+    best.display();
+}
+
+// =========================
+// Users
+// =========================
+void DatabaseManager::viewUsers() {
+    for (auto &u : users)
+        cout << u.getUsername() << (u.admin() ? " (Admin)" : " (User)") << endl;
+}
+
+void DatabaseManager::addUser() {
+    string u, p;
+    cout << "Username: ";
+    cin >> u;
+    cout << "Password: ";
+    cin >> p;
+
+    users.push_back(User(u, p, false));
+    saveUsers();
+    cout << "User added!\n";
+}
+
+void DatabaseManager::deleteUser() {
+    string u;
+    cout << "Enter username: ";
+    cin >> u;
+
+    if (u == "admin") {
+        cout << "Cannot delete admin.\n";
+        return;
+    }
+
+    for (auto it = users.begin(); it != users.end(); ++it) {
+        if (it->getUsername() == u) {
+            users.erase(it);
+            saveUsers();
+            cout << "User deleted!\n";
+            return;
+        }
+    }
+    cout << "User not found.\n";
+}
+
+// =========================
+// Sorting
+// =========================
+void DatabaseManager::sortTeams() {
+    int choice;
+    cout << "Sort by:\n"
+         << "1. Name\n2. City\n3. Games\n4. Wins\n5. Losses\n6. Draws\n7. Players\nChoice: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getName() < b.getName(); }); break;
+        case 2: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getCity() < b.getCity(); }); break;
+        case 3: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getGamesPlayed() > b.getGamesPlayed(); }); break;
+        case 4: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getWins() > b.getWins(); }); break;
+        case 5: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getLosses() > b.getLosses(); }); break;
+        case 6: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getDraws() > b.getDraws(); }); break;
+        case 7: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getPlayersCount() > b.getPlayersCount(); }); break;
+        default: cout << "Invalid choice.\n"; return;
+    }
+
+    cout << "Teams sorted.\n";
+    viewTeams();
+}
+
+// =========================
+// Help
+// =========================
+void DatabaseManager::showHelp() {
+    cout << "\n=== Help ===\n"
+         << "Work with football teams, stats, users.\n"
+         << "Enter valid words for names, and numbers for stats.\n"
+         << "Menu options:\n"
+         << "1. View teams\n2. Add team\n3. Delete team\n"
+         << "4. Search\n5. Edit\n6. Count small teams\n"
+         << "7. Best team\n8. View users\n9. Add user\n"
+         << "10. Delete user\n11. Sort teams\n12. Help\n0. Exit\n\n";
+}

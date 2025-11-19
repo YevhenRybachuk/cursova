@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 using namespace std;
 
 class ISerializable {
@@ -104,36 +105,6 @@ private:
     vector<User> users;
 public:
 
-    int safeInput(const string &prompt) {
-        string input;
-        int value;
-        while (true) {
-            cout << prompt;
-            getline(cin, input);
-            stringstream ss(input);
-            if (ss >> value && ss.eof() && value >= 0) {
-                return value;
-            } else {
-                cout << "Invalid input! Please enter a non-negative whole number.\n";
-            }
-        }
-    }
-
-    int safeInputWithKeep(const string &prompt) {
-        string input;
-        int value;
-        while (true) {
-            cout << prompt;
-            getline(cin, input);
-            stringstream ss(input);
-            if (ss >> value && ss.eof()) {
-                if (value >= -1) return value;
-            }
-            cout << "Invalid input! Please enter a whole number (>=0 or -1 to keep current).\n";
-        }
-    }
-
-
     bool isValidName(const string &str) {
         if (str.empty()) return false;
 
@@ -199,10 +170,52 @@ public:
         for (auto &t : teams) t.display();
     }
 
+    bool safeInputInt(const std::string& prompt, int& value) {
+        std::cout << prompt;
+
+        while (true) {
+            if (std::cin >> value) {
+                if (value >= 0) {
+                    return true; // успішно
+                } else {
+                    std::cout << "Number must be positive and non-zero! Try again: ";
+                }
+            } else {
+                std::cout << "Invalid input! Please enter a valid number: ";
+                std::cin.clear();
+            }
+
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+
+
+    int safeChoice() {
+        int x;
+
+        while (true) {
+            if (std::cin >> x) {
+                if (x >= 0) {
+                    return x;
+                } else {
+                    std::cout << "Choice must be a positive number! Try again: ";
+                }
+            } else {
+                std::cout << "Invalid input! Please enter a number: ";
+                std::cin.clear();
+            }
+
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+
+
+
     void addTeam() {
         string name, city;
+        int g, w, l, d, p;
 
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         do {
             cout << "Enter team name (letters, spaces, hyphens only): ";
@@ -216,11 +229,11 @@ public:
             if (!isValidName(city)) cout << "Invalid city name! Try again.\n";
         } while (!isValidName(city));
 
-        int g = safeInput("Games played: ");
-        int w = safeInput("Wins: ");
-        int l = safeInput("Losses: ");
-        int d = safeInput("Draws: ");
-        int p = safeInput("Players count: ");
+        safeInputInt("Games played: ", g);
+        safeInputInt("Wins: ", w);
+        safeInputInt("Losses: ", l);
+        safeInputInt("Draws: ", d);
+        safeInputInt("Players count: ", p);
 
         if (w + l + d != g) {
             cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
@@ -231,6 +244,7 @@ public:
         saveTeams();
         cout << "Team added and saved!\n";
     }
+
 
     void deleteTeam() {
         string name;
@@ -260,53 +274,70 @@ public:
         cout << "Team not found.\n";
     }
 
-   void editTeam() {
+void editTeam() {
     string name;
     cout << "Enter team name to edit: ";
-    cin.ignore();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, name);
 
     for (auto &t : teams) {
         if (t.getName() == name) {
+
             string newName, newCity;
+            int g, w, l, d, p;
 
             cout << "Editing team: " << name << endl;
 
             do {
-                cout << "Enter new name (leave empty to keep current): ";
+                cout << "Enter NEW team name: ";
                 getline(cin, newName);
-                if (!newName.empty() && !isValidName(newName)) {
+
+                if (newName.empty()) {
+                    cout << "Name cannot be empty! Try again.\n";
+                    continue;
+                }
+
+                if (!isValidName(newName)) {
                     cout << "Invalid name! Try again.\n";
                 }
-            } while (!newName.empty() && !isValidName(newName));
+            } while (newName.empty() || !isValidName(newName));
 
             do {
-                cout << "Enter new city (leave empty to keep current): ";
+                cout << "Enter NEW city name: ";
                 getline(cin, newCity);
-                if (!newCity.empty() && !isValidName(newCity)) {
+
+                if (newCity.empty()) {
+                    cout << "City cannot be empty! Try again.\n";
+                    continue;
+                }
+
+                if (!isValidName(newCity)) {
                     cout << "Invalid city name! Try again.\n";
                 }
-            } while (!newCity.empty() && !isValidName(newCity));
+            } while (newCity.empty() || !isValidName(newCity));
 
-            int g = safeInputWithKeep("Games played (-1 to keep current): ");
-            int w = safeInputWithKeep("Wins (-1 to keep current): ");
-            int l = safeInputWithKeep("Losses (-1 to keep current): ");
-            int d = safeInputWithKeep("Draws (-1 to keep current): ");
-            int p = safeInputWithKeep("Players count (-1 to keep current): ");
+            cout << "Enter NEW games played: ";
+            g = safeChoice();
 
-            if (g < 0) g = t.getGamesPlayed();
-            if (w < 0) w = t.getWins();
-            if (l < 0) l = t.getLosses();
-            if (d < 0) d = t.getDraws();
-            if (p < 0) p = t.getPlayersCount();
+            cout << "Enter NEW wins: ";
+            w = safeChoice();
+
+            cout << "Enter NEW losses: ";
+            l = safeChoice();
+
+            cout << "Enter NEW draws: ";
+            d = safeChoice();
+
+            cout << "Enter NEW players count: ";
+            p = safeChoice();
 
             if (w + l + d != g) {
                 cout << "Error: Wins + Losses + Draws must equal Games Played!\n";
                 return;
             }
 
-            if (!newName.empty()) t.setName(newName);
-            if (!newCity.empty()) t.setCity(newCity);
+            t.setName(newName);
+            t.setCity(newCity);
             t.setGames(g);
             t.setWins(w);
             t.setLosses(l);
@@ -314,10 +345,11 @@ public:
             t.setPlayers(p);
 
             saveTeams();
-            cout << "Team updated and saved!\n";
+            cout << "Team fully updated and saved!\n";
             return;
         }
     }
+
     cout << "Team not found.\n";
 }
 
@@ -426,13 +458,23 @@ int main() {
 
     string login, pass;
     bool isAdmin = false;
-    cout << "Login: "; cin >> login;
-    cout << "Password: "; cin >> pass;
 
-    if (!db.login(login, pass, isAdmin)) {
-        cout << "Invalid login or password!\n";
-        return 0;
+    while (true) {
+        cout << "Login: ";
+        cin >> login;
+
+        cout << "Password: ";
+        cin >> pass;
+
+        if (db.login(login, pass, isAdmin)) {
+            break;
+        }
+
+        cout << "Invalid login or password! Try again.\n";
     }
+
+    cout << "Login successful!\n";
+
 
     cout << "Welcome, " << login << "! You are " << (isAdmin ? "Administrator" : "User") << ".\n";
 
@@ -465,7 +507,9 @@ int main() {
         do {
             cout << "\n--- User Menu ---\n";
             cout << "1. View teams\n2. Search team\n3. Count teams with <10 players\n4. Find team with most wins\n5. Sort teams\n6. Help\n0. Exit\nChoice: ";
-            cin >> choice;
+            choice = db.safeChoice();
+
+
             switch (choice) {
                 case 1: db.viewTeams(); break;
                 case 2: db.searchTeam(); break;
