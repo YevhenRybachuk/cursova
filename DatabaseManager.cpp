@@ -1,13 +1,16 @@
 #include "DatabaseManager.h"
+
 #include <iostream>
 #include <limits>
 
 using namespace std;
 
 bool DatabaseManager::isValidName(const string &str) {
-    if (str.empty()) return false;
+    if (str.empty())
+        return false;
 
     bool hasLetter = false;
+
     for (char c : str) {
         if (isalpha(static_cast<unsigned char>(c))) {
             hasLetter = true;
@@ -18,9 +21,34 @@ bool DatabaseManager::isValidName(const string &str) {
     return hasLetter;
 }
 
+void DatabaseManager::loadAdmins() {
+    ifstream file("admins.txt");
+    if (!file)
+        throw runtime_error("Failed to open admins.txt");
+
+    string line;
+    while (getline(file, line)) {
+        size_t pos = line.find(':');
+        if (pos == string::npos)
+            continue;
+
+        string adminUsername = line.substr(0, pos);
+        string adminPassword = line.substr(pos + 1);
+
+        for (auto &user : users) {
+            if (user.getUsername() == adminUsername &&
+                user.checkPassword(adminUsername, adminPassword)) {
+                user.setAdmin(true);
+                break;
+            }
+        }
+    }
+}
+
 void DatabaseManager::loadUsers() {
     ifstream file("users.txt");
-    if (!file) throw runtime_error("Failed to open users.txt");
+    if (!file)
+        throw runtime_error("Failed to open users.txt");
 
     string line;
     while (getline(file, line)) {
@@ -32,7 +60,8 @@ void DatabaseManager::loadUsers() {
 
 void DatabaseManager::loadTeams() {
     ifstream file("teams.csv");
-    if (!file) throw runtime_error("Failed to open teams.csv");
+    if (!file)
+        throw runtime_error("Failed to open teams.csv");
 
     string line;
     while (getline(file, line)) {
@@ -44,16 +73,14 @@ void DatabaseManager::loadTeams() {
 
 void DatabaseManager::saveTeams() {
     ofstream file("teams.csv", ios::trunc);
-    for (auto &t : teams) {
+    for (auto &t : teams)
         file << t.toString() << "\n";
-    }
 }
 
 void DatabaseManager::saveUsers() {
     ofstream file("users.txt");
-    for (auto &u : users) {
+    for (auto &u : users)
         file << u.toString() << "\n";
-    }
 }
 
 bool DatabaseManager::login(string u, string p, bool &adminFlag) {
@@ -66,9 +93,8 @@ bool DatabaseManager::login(string u, string p, bool &adminFlag) {
     return false;
 }
 
-bool DatabaseManager::safeInputInt(const string& prompt, int& value) {
+bool DatabaseManager::safeInputInt(const string &prompt, int &value) {
     cout << prompt;
-
     while (true) {
         if (cin >> value) {
             if (value >= 0)
@@ -79,23 +105,21 @@ bool DatabaseManager::safeInputInt(const string& prompt, int& value) {
             cout << "Invalid input! Enter a number: ";
             cin.clear();
         }
-
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 }
 
 int DatabaseManager::safeChoice() {
     int x;
-
     while (true) {
         if (cin >> x) {
-            if (x >= 0) return x;
+            if (x >= 0)
+                return x;
             cout << "Choice must be >= 0: ";
         } else {
             cout << "Invalid number: ";
             cin.clear();
         }
-
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 }
@@ -114,13 +138,15 @@ void DatabaseManager::addTeam() {
     do {
         cout << "Enter team name: ";
         getline(cin, name);
-        if (!isValidName(name)) cout << "Invalid name!\n";
+        if (!isValidName(name))
+            cout << "Invalid name!\n";
     } while (!isValidName(name));
 
     do {
         cout << "Enter city: ";
         getline(cin, city);
-        if (!isValidName(city)) cout << "Invalid city!\n";
+        if (!isValidName(city))
+            cout << "Invalid city!\n";
     } while (!isValidName(city));
 
     safeInputInt("Games played: ", g);
@@ -142,7 +168,7 @@ void DatabaseManager::addTeam() {
 void DatabaseManager::deleteTeam() {
     string name;
     cout << "Enter team name to delete: ";
-    cin.ignore();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, name);
 
     for (auto it = teams.begin(); it != teams.end(); ++it) {
@@ -159,7 +185,7 @@ void DatabaseManager::deleteTeam() {
 void DatabaseManager::searchTeam() {
     string name;
     cout << "Enter team name: ";
-    cin.ignore();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, name);
 
     for (auto &t : teams) {
@@ -179,7 +205,6 @@ void DatabaseManager::editTeam() {
 
     for (auto &t : teams) {
         if (t.getName() == name) {
-
             string newName, newCity;
             int g, w, l, d, p;
 
@@ -188,28 +213,31 @@ void DatabaseManager::editTeam() {
             do {
                 cout << "Enter NEW team name: ";
                 getline(cin, newName);
-
-                if (newName.empty()) {
+                if (newName.empty())
                     cout << "Cannot be empty!\n";
-                    continue;
-                }
             } while (!isValidName(newName));
 
             do {
                 cout << "Enter NEW city: ";
                 getline(cin, newCity);
-
-                if (newCity.empty()) {
+                if (newCity.empty())
                     cout << "Cannot be empty!\n";
-                    continue;
-                }
             } while (!isValidName(newCity));
 
-            cout << "Enter NEW games played: "; g = safeChoice();
-            cout << "Enter NEW wins: "; w = safeChoice();
-            cout << "Enter NEW losses: "; l = safeChoice();
-            cout << "Enter NEW draws: "; d = safeChoice();
-            cout << "Enter NEW players count: "; p = safeChoice();
+            cout << "Enter NEW games played: ";
+            g = safeChoice();
+
+            cout << "Enter NEW wins: ";
+            w = safeChoice();
+
+            cout << "Enter NEW losses: ";
+            l = safeChoice();
+
+            cout << "Enter NEW draws: ";
+            d = safeChoice();
+
+            cout << "Enter NEW players count: ";
+            p = safeChoice();
 
             if (w + l + d != g) {
                 cout << "Error: Wins + Losses + Draws != Games Played!\n";
@@ -229,20 +257,20 @@ void DatabaseManager::editTeam() {
             return;
         }
     }
-
     cout << "Team not found.\n";
 }
 
 void DatabaseManager::countTeamsWithLessThan10Players() {
     int count = 0;
     for (auto &t : teams)
-        if (t.getPlayersCount() < 10) count++;
-
+        if (t.getPlayersCount() < 10)
+            count++;
     cout << "Teams with <10 players: " << count << endl;
 }
 
 void DatabaseManager::findTeamWithMostWins() {
-    if (teams.empty()) return;
+    if (teams.empty())
+        return;
 
     Team best = teams[0];
     for (auto &t : teams)
@@ -294,18 +322,48 @@ void DatabaseManager::deleteUser() {
 void DatabaseManager::sortTeams() {
     int choice;
     cout << "Sort by:\n"
-         << "1. Name\n2. City\n3. Games\n4. Wins\n5. Losses\n6. Draws\n7. Players\nChoice: ";
+         << "1. Name\n"
+         << "2. City\n"
+         << "3. Games\n"
+         << "4. Wins\n"
+         << "5. Losses\n"
+         << "6. Draws\n"
+         << "7. Players\n"
+         << "Choice: ";
     cin >> choice;
 
     switch (choice) {
-        case 1: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getName() < b.getName(); }); break;
-        case 2: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getCity() < b.getCity(); }); break;
-        case 3: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getGamesPlayed() > b.getGamesPlayed(); }); break;
-        case 4: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getWins() > b.getWins(); }); break;
-        case 5: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getLosses() > b.getLosses(); }); break;
-        case 6: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getDraws() > b.getDraws(); }); break;
-        case 7: sort(teams.begin(), teams.end(), [](Team &a, Team &b){ return a.getPlayersCount() > b.getPlayersCount(); }); break;
-        default: cout << "Invalid choice.\n"; return;
+        case 1:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getName() < b.getName(); });
+            break;
+        case 2:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getCity() < b.getCity(); });
+            break;
+        case 3:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getGamesPlayed() > b.getGamesPlayed(); });
+            break;
+        case 4:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getWins() > b.getWins(); });
+            break;
+        case 5:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getLosses() > b.getLosses(); });
+            break;
+        case 6:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getDraws() > b.getDraws(); });
+            break;
+        case 7:
+            sort(teams.begin(), teams.end(),
+                 [](Team &a, Team &b) { return a.getPlayersCount() > b.getPlayersCount(); });
+            break;
+        default:
+            cout << "Invalid choice.\n";
+            return;
     }
 
     cout << "Teams sorted.\n";
@@ -316,9 +374,12 @@ void DatabaseManager::showHelp() {
     cout << "\n=== USER MANUAL ===\n";
 
     cout << "\n1. Program Purpose\n\n"
-         << "This program allows a regular user to view and search information about football teams.\n"
-         << "The user can also sort teams and view basic statistics.\n"
-         << "Modifying teams or managing users is not available for regular users.\n";
+         << "This program allows a regular user to view and "
+         << "search information about football teams.\n"
+         << "The user can also sort teams and view basic "
+         << "statistics.\n"
+         << "Modifying teams or managing users is not "
+         << "available for regular users.\n";
 
     cout << "\n2. Data Input Rules\n\n"
          << "Text Input (team name, city):\n"
@@ -328,7 +389,6 @@ void DatabaseManager::showHelp() {
          << "Tigers, Red Wolves, New-York\n\n"
          << "Invalid examples:\n"
          << "Tiger123, @Team, !!!\n\n"
-
          << "Numeric Input:\n"
          << "- All numeric fields must be whole numbers >= 0.\n"
          << "- Includes: games played, wins, losses, draws, number of players.\n"
@@ -337,34 +397,12 @@ void DatabaseManager::showHelp() {
          << "Wins + Losses + Draws must equal Games Played.\n";
 
     cout << "\n3. Menu Commands (Regular User)\n\n"
-         << "A regular user has access to the following commands:\n\n"
          << "1. View teams\n"
-         << "   Displays all teams in the database.\n\n"
-
          << "2. Search team\n"
-         << "   Searches for a team by name and shows its data.\n\n"
-
          << "3. Count teams with less than 10 players\n"
-         << "   Shows how many teams have fewer than 10 players.\n\n"
-
          << "4. Find team with most wins\n"
-         << "   Displays the team with the highest number of wins.\n\n"
-
          << "5. Sort teams\n"
-         << "   Allows sorting teams by:\n"
-         << "   - name\n"
-         << "   - city\n"
-         << "   - games played\n"
-         << "   - wins\n"
-         << "   - losses\n"
-         << "   - draws\n"
-         << "   - number of players\n\n"
-
          << "6. Help\n"
-         << "   Displays this help section.\n\n"
-
-         << "0. Exit\n"
-         << "   Closes the program.\n\n";
-
-    cout << "Regular users cannot modify teams or manage user accounts.\n\n";
+         << "0. Exit\n\n"
+         << "Regular users cannot modify teams or manage user accounts.\n\n";
 }

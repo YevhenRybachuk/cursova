@@ -1,4 +1,5 @@
 #include "User.h"
+#include<fstream>
 
 User::User() : isAdmin(false) {}
 
@@ -9,7 +10,6 @@ void User::loadFromString(const string &data) {
     size_t pos = data.find(':');
     username = data.substr(0, pos);
     password = data.substr(pos + 1);
-    isAdmin = (username == "admin");
 }
 
 string User::toString() const {
@@ -26,4 +26,12 @@ bool User::admin() const {
 
 string User::getUsername() const {
     return username;
+}
+
+string User::getPassword() const {
+    return password;
+}
+
+void User::setAdmin(bool a) {
+    isAdmin = a;
 }

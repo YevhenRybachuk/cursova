@@ -8,6 +8,7 @@ int main() {
     try {
         db.loadUsers();
         db.loadTeams();
+        db.loadAdmins();
     } catch (const exception &e) {
         cerr << e.what() << endl;
         return 1;

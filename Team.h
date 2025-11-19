@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include "Entity.h"
+
 using namespace std;
 
 class Team : public Entity {
@@ -15,7 +16,6 @@ public:
     Team(string n, string c, int g, int w, int l, int d, int p);
 
     void display() const override;
-
     void loadFromString(const string &data) override;
     string toString() const override;
 

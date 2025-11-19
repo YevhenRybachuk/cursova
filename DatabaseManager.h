@@ -16,6 +16,7 @@ public:
 
     void loadUsers();
     void loadTeams();
+    void loadAdmins();
 
     void saveUsers();
     void saveTeams();
