@@ -4,9 +4,6 @@
 
 using namespace std;
 
-// =========================
-// Validation
-// =========================
 bool DatabaseManager::isValidName(const string &str) {
     if (str.empty()) return false;
 
@@ -21,9 +18,6 @@ bool DatabaseManager::isValidName(const string &str) {
     return hasLetter;
 }
 
-// =========================
-// Loading / Saving
-// =========================
 void DatabaseManager::loadUsers() {
     ifstream file("users.txt");
     if (!file) throw runtime_error("Failed to open users.txt");
@@ -62,9 +56,6 @@ void DatabaseManager::saveUsers() {
     }
 }
 
-// =========================
-// Login
-// =========================
 bool DatabaseManager::login(string u, string p, bool &adminFlag) {
     for (auto &usr : users) {
         if (usr.checkPassword(u, p)) {
@@ -75,9 +66,6 @@ bool DatabaseManager::login(string u, string p, bool &adminFlag) {
     return false;
 }
 
-// =========================
-// Safe Input Helpers
-// =========================
 bool DatabaseManager::safeInputInt(const string& prompt, int& value) {
     cout << prompt;
 
@@ -112,9 +100,6 @@ int DatabaseManager::safeChoice() {
     }
 }
 
-// =========================
-// Team operations
-// =========================
 void DatabaseManager::viewTeams() {
     for (auto &t : teams)
         t.display();
@@ -268,9 +253,6 @@ void DatabaseManager::findTeamWithMostWins() {
     best.display();
 }
 
-// =========================
-// Users
-// =========================
 void DatabaseManager::viewUsers() {
     for (auto &u : users)
         cout << u.getUsername() << (u.admin() ? " (Admin)" : " (User)") << endl;
@@ -309,9 +291,6 @@ void DatabaseManager::deleteUser() {
     cout << "User not found.\n";
 }
 
-// =========================
-// Sorting
-// =========================
 void DatabaseManager::sortTeams() {
     int choice;
     cout << "Sort by:\n"
@@ -333,16 +312,59 @@ void DatabaseManager::sortTeams() {
     viewTeams();
 }
 
-// =========================
-// Help
-// =========================
 void DatabaseManager::showHelp() {
-    cout << "\n=== Help ===\n"
-         << "Work with football teams, stats, users.\n"
-         << "Enter valid words for names, and numbers for stats.\n"
-         << "Menu options:\n"
-         << "1. View teams\n2. Add team\n3. Delete team\n"
-         << "4. Search\n5. Edit\n6. Count small teams\n"
-         << "7. Best team\n8. View users\n9. Add user\n"
-         << "10. Delete user\n11. Sort teams\n12. Help\n0. Exit\n\n";
+    cout << "\n=== USER MANUAL ===\n";
+
+    cout << "\n1. Program Purpose\n\n"
+         << "This program allows a regular user to view and search information about football teams.\n"
+         << "The user can also sort teams and view basic statistics.\n"
+         << "Modifying teams or managing users is not available for regular users.\n";
+
+    cout << "\n2. Data Input Rules\n\n"
+         << "Text Input (team name, city):\n"
+         << "- Only letters, spaces, and hyphens are allowed.\n"
+         << "- The field cannot be empty.\n\n"
+         << "Valid examples:\n"
+         << "Tigers, Red Wolves, New-York\n\n"
+         << "Invalid examples:\n"
+         << "Tiger123, @Team, !!!\n\n"
+
+         << "Numeric Input:\n"
+         << "- All numeric fields must be whole numbers >= 0.\n"
+         << "- Includes: games played, wins, losses, draws, number of players.\n"
+         << "- If text is entered instead of a number, the program will request input again.\n\n"
+         << "Important rule:\n"
+         << "Wins + Losses + Draws must equal Games Played.\n";
+
+    cout << "\n3. Menu Commands (Regular User)\n\n"
+         << "A regular user has access to the following commands:\n\n"
+         << "1. View teams\n"
+         << "   Displays all teams in the database.\n\n"
+
+         << "2. Search team\n"
+         << "   Searches for a team by name and shows its data.\n\n"
+
+         << "3. Count teams with less than 10 players\n"
+         << "   Shows how many teams have fewer than 10 players.\n\n"
+
+         << "4. Find team with most wins\n"
+         << "   Displays the team with the highest number of wins.\n\n"
+
+         << "5. Sort teams\n"
+         << "   Allows sorting teams by:\n"
+         << "   - name\n"
+         << "   - city\n"
+         << "   - games played\n"
+         << "   - wins\n"
+         << "   - losses\n"
+         << "   - draws\n"
+         << "   - number of players\n\n"
+
+         << "6. Help\n"
+         << "   Displays this help section.\n\n"
+
+         << "0. Exit\n"
+         << "   Closes the program.\n\n";
+
+    cout << "Regular users cannot modify teams or manage user accounts.\n\n";
 }

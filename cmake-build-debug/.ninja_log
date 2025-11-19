@@ -1,8 +1,12 @@
 # ninja log v6
-10	1323	7852784404580026	CMakeFiles/cursova.dir/main.cpp.obj	878ec98a70f850fb
-1324	1545	7852784417713383	cursova.exe	cb99130af7409db5
-19	76	7852793000757971	CMakeFiles/cursova.dir/ISerializable.cpp.obj	9407fefdfc3af8d2
-22	552	7852793000787906	CMakeFiles/cursova.dir/Entity.cpp.obj	2a1f1c924f52ece0
-28	670	7852793000848167	CMakeFiles/cursova.dir/User.cpp.obj	424d5412496a90cb
-24	747	7852793000808298	CMakeFiles/cursova.dir/Team.cpp.obj	839c90c10cd854f1
-16	1507	7852793000726974	CMakeFiles/cursova.dir/main.cpp.obj	878ec98a70f850fb
+40	1656	7852816750037207	CMakeFiles/cursova.dir/main.cpp.obj	5e2f667ef400c9a0
+2	263	7852818502160000	build.ninja	bb58c5e1408cb340
+2443	2648	7852816774070178	cursova.exe	86dd37017910db69
+49	1183	7852816750136921	CMakeFiles/cursova.dir/User.cpp.obj	34c5114034f39307
+45	1373	7852816750087051	CMakeFiles/cursova.dir/Team.cpp.obj	9b25c0635130d6d3
+54	2443	7852816750176819	CMakeFiles/cursova.dir/DatabaseManager.cpp.obj	9df0abc39c521e07
+120	1885	7852818529702255	CMakeFiles/cursova.dir/User.cpp.obj	82ba30bf19f29772
+116	2200	7852818529662363	CMakeFiles/cursova.dir/Team.cpp.obj	9696ea2e4f104010
+10	2672	7852818528594561	CMakeFiles/cursova.dir/main.cpp.obj	6b9b18a748c7abba
+124	3392	7852818529742149	CMakeFiles/cursova.dir/DatabaseManager.cpp.obj	3cf9dd8acedd6421
+3392	3960	7852818562422253	cursova.exe	86dd37017910db69

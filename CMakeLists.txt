@@ -4,9 +4,7 @@ project(cursova)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(cursova main.cpp
-        ISerializable.cpp
         ISerializable.h
-        Entity.cpp
         Entity.h
         Team.cpp
         Team.h
